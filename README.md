@@ -1,313 +1,174 @@
-# Claude Docs — Wedoobe
+# How to create an Odoo 19 theme with Claude Code
 
-Reference files and guides for working with Claude Code, GitHub MCP, and Odoo 19 theme development.
-
----
-
-## Table of Contents
-
-1. [Setting up Claude Code in the terminal](#1-setting-up-claude-code-in-the-terminal)
-2. [Connecting GitHub via MCP](#2-connecting-github-via-mcp)
-3. [Creating a new Odoo 19 theme](#3-creating-a-new-odoo-19-theme)
+A practical step-by-step guide. Follow this in order.
 
 ---
 
-## 1. Setting up Claude Code in the terminal
+## Step 1 — Install Claude Code
 
-### Install
-
-Claude Code requires Node.js 18 or higher.
+Open your terminal and run:
 
 ```bash
 npm install -g @anthropic-ai/claude-code
 ```
 
-### Authenticate
+Then start it:
 
 ```bash
 claude
 ```
 
-On first run it will open a browser window to log in with your Anthropic account. Follow the prompts.
-
-### Start a session
-
-```bash
-claude
-```
-
-Or open it in a specific project folder:
-
-```bash
-cd /path/to/your/project
-claude
-```
-
-### Key commands inside Claude Code
-
-| Command | What it does |
-|---------|-------------|
-| `/help` | Show available commands |
-| `/clear` | Clear the conversation |
-| `/exit` | Exit Claude Code |
-| `! <command>` | Run a shell command directly (e.g. `! git status`) |
+Log in with your Anthropic account when prompted.
 
 ---
 
-## 2. Connecting GitHub via MCP
+## Step 2 — Connect GitHub
 
-MCP (Model Context Protocol) lets Claude Code talk to external services like GitHub.
+You need a GitHub Personal Access Token so Claude can read and write files directly in your repos without cloning.
 
-### Add the GitHub MCP server
+1. Go to **GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens**
+2. Create a token with these permissions:
+   - **Contents** — read & write
+   - **Metadata** — read
+3. Copy the token, then run this in Claude Code:
 
-Run this once in your Claude Code session:
-
-```bash
-claude mcp add-json github '{"type":"http","url":"https://api.githubcopilot.com/mcp","headers":{"Authorization":"Bearer YOUR_GITHUB_TOKEN"}}'
+```
+claude mcp add-json github '{"type":"http","url":"https://api.githubcopilot.com/mcp","headers":{"Authorization":"Bearer YOUR_TOKEN_HERE"}}'
 ```
 
-Replace `YOUR_GITHUB_TOKEN` with a GitHub Personal Access Token.  
-Generate one at: **GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens**
+4. Verify it works:
 
-Required token permissions:
-- **Contents** — read & write (to create/update files)
-- **Metadata** — read
-
-### Verify the connection
-
-```bash
+```
 claude mcp list
 ```
 
-You should see `github: https://api.githubcopilot.com/mcp (HTTP) - Connected`.
-
-### What you can do with GitHub MCP
-
-Once connected, Claude Code can:
-- Read and write files directly in any GitHub repo (no local clone needed)
-- Create and manage repositories
-- List branches, commits, and file trees
-- Push commits via the GitHub API
-
-### Useful `gh` CLI commands
-
-The `gh` CLI works alongside MCP for repo management:
-
-```bash
-gh repo list                          # list your repos
-gh repo create wedoobe/my-repo --private   # create a new repo
-gh api "repos/wedoobe/my-repo/git/trees/HEAD?recursive=1" --jq '.tree[].path'  # list all files
-```
+You should see `github - Connected`.
 
 ---
 
-## 3. Creating a new Odoo 19 theme
+## Step 3 — Set up your Odoo.sh repo
 
-Always follow this workflow before writing any code:
-
-1. **Ask for a design** — get a screenshot, mockup, or reference website
-2. **Cut the design into sections** — identify every distinct visual block (hero, cards, expertise grid, CTA, footer, etc.)
-3. **Map each section to a block** — each block gets its own XML, SCSS, and optionally JS
-4. **Never start building** until the design is confirmed and sections are agreed upon
+1. Create a new repo on GitHub (e.g. `wedoobe/my-project`)
+2. Connect it to Odoo.sh as a new branch/build
+3. Add `CLAUDE.md` and `ODOO_REFERENCE.md` from this repo to the root of your project repo — Claude will use these as its rulebook
 
 ---
 
-### Module naming
+## Step 4 — Get a design
 
-- Prefix: `website_` (e.g. `website_defender`)
-- Lowercase, alphanumerics and underscores only
+Before asking Claude to build anything, you need a design reference.
+
+- Take a screenshot of a website you want to replicate, **or**
+- Export a mockup from Figma / Adobe XD, **or**
+- Draw a rough sketch and photograph it
+
+> Claude will refuse to start building without a design. This is intentional.
 
 ---
 
-### Module structure
+## Step 5 — Start a Claude session in your project
+
+Open Claude Code and tell it which repo to work in:
 
 ```
-website_<name>/
-├── __init__.py
-├── __manifest__.py
-├── data/
-│   ├── presets.xml
-│   └── pages/
-│       └── home.xml
-├── views/
-│   └── website_templates.xml      # header/footer overrides
-└── static/
-    └── src/
-        └── scss/
-            ├── primary_variables.scss
-            ├── bootstrap_overridden.scss
-            ├── theme.scss
-            ├── layout/
-            │   └── header.scss
-            └── pages/
-                └── home.scss
+I want to create a new Odoo 19 theme in the repo wedoobe/my-project
 ```
 
+Then paste or attach your design screenshot.
+
+Claude will:
+1. Analyse the design
+2. Break it into sections (hero, cards, expertise, CTA, footer, etc.)
+3. Ask you to confirm the section breakdown before writing any code
+4. Scaffold the full module directly into your GitHub repo via the API
+
 ---
 
-### `__init__.py`
+## Step 6 — Review the sections
 
-```python
-# -*- coding: utf-8 -*-
+Claude will list every section it identified from your design, for example:
+
+```
+Section 1 — Hero: full-width background image, centered title, diagonal bottom cut
+Section 2 — Cards: 3-column image cards with title and description
+Section 3 — Expertise: 4-column icon grid
+Section 4 — Contact form: dark background, minimal input fields
+Section 5 — Header: dark nav, centered logo, social link right
+Section 6 — Footer: dark, social icons, nav links
 ```
 
+Confirm or correct this before Claude starts building.
+
 ---
 
-### `__manifest__.py`
+## Step 7 — Let Claude build
 
-```python
-# -*- coding: utf-8 -*-
-{
-    'name': 'My Theme',
-    'description': 'Website theme for mysite.be',
-    'category': 'Theme/Corporate',
-    'version': '19.0.1.0.0',
-    'author': 'wedoobe',
-    'license': 'LGPL-3',
-    'depends': ['website'],
-    'data': [
-        'data/presets.xml',
-        'data/pages/home.xml',
-        'views/website_templates.xml',
-    ],
-    'assets': {
-        'web._assets_primary_variables': [
-            'website_<name>/static/src/scss/primary_variables.scss',
-        ],
-        'web._assets_frontend_helpers': [
-            ('prepend', 'website_<name>/static/src/scss/bootstrap_overridden.scss'),
-        ],
-        'web.assets_frontend': [
-            'website_<name>/static/src/scss/theme.scss',
-            'website_<name>/static/src/scss/layout/header.scss',
-            'website_<name>/static/src/scss/pages/home.scss',
-        ],
-    },
-}
+Once sections are confirmed, Claude pushes all files to your GitHub repo:
+
+- `__init__.py`, `__manifest__.py`
+- `data/presets.xml`, `data/pages/home.xml`
+- `views/website_templates.xml`
+- SCSS files for variables, theme, header, and each page section
+
+No local clone needed — everything goes straight to GitHub.
+
+---
+
+## Step 8 — Deploy on Odoo.sh
+
+1. The push triggers an automatic rebuild on Odoo.sh
+2. If the branch is locked → click **Rebuild** in the Odoo.sh dashboard
+3. Wait for the build to complete (it will cycle through `base → web → website → your module`)
+4. Go to **Apps → Update Apps List**
+5. Find your theme and click **Install**
+
+> Rebuild alone does not apply XML changes — you must also install or upgrade the module.
+
+---
+
+## Step 9 — Review and iterate
+
+Open your website in Odoo and compare it to your design reference.
+
+If something is off, describe it to Claude:
+
+```
+The header logo is not centered — in the reference it sits exactly in the middle
+The hero section is missing the diagonal bottom cut
+The card images are not showing
 ```
 
-> **Never use wildcards** like `scss/*.scss` — always list files explicitly.
+Claude will update the files and push again. Repeat until the design matches.
 
 ---
 
-### `primary_variables.scss`
+## Step 10 — Add your images
 
-Use individual color variables (not the `$o-colors` map) to avoid SCSS compilation errors on fresh installs:
+Claude cannot upload images — you add those yourself via the Odoo Website Builder:
 
-```scss
-// Fonts
-$o-theme-font-urls: (
-    'Oswald': 'https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&display=swap',
-) !default;
-
-$o-theme-fonts: (
-    'Oswald': (
-        'family': "'Oswald', sans-serif",
-        'type': 'sans-serif',
-    ),
-) !default;
-
-$o-headings-font-name: 'Oswald' !default;
-$o-base-font-name: 'Open Sans' !default;
-
-// Colors — use individual vars, NOT the $o-colors map
-$o-color-1: #111111 !default;
-$o-color-2: #C8A96E !default;
-$o-color-3: #1A1A1A !default;
-$o-color-4: #FFFFFF !default;
-$o-color-5: #0A0A0A !default;
-
-$o-header-template: 'default' !default;
-$o-footer-template: 'default' !default;
-```
-
----
-
-### `bootstrap_overridden.scss`
-
-Variable definitions only — no output CSS:
-
-```scss
-$h1-font-size: 3.5rem !default;
-$h2-font-size: 2.75rem !default;
-$btn-border-radius: 0 !default;
-$btn-font-weight: 700 !default;
-$input-border-radius: 0 !default;
-$navbar-padding-y: 1.25rem !default;
-```
-
----
-
-### `data/presets.xml`
-
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<odoo>
-</odoo>
-```
-
----
-
-### `data/pages/home.xml`
-
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<odoo noupdate="1">
-    <record id="page_home" model="website.page">
-        <field name="name">Home</field>
-        <field name="is_published" eval="True"/>
-        <field name="key">website_<name>.page_home</field>
-        <field name="url">/</field>
-        <field name="type">qweb</field>
-        <field name="arch" type="xml">
-            <t t-name="website_<name>.page_home">
-                <t t-call="website.layout">
-                    <t t-set="additional_title">Page Title</t>
-                    <div id="wrap" class="oe_structure">
-
-                        <!-- Section 1: Hero -->
-                        <section class="s_hero o_cc o_cc1">
-                            ...
-                        </section>
-
-                        <!-- Section 2: Cards -->
-                        <section class="s_cards o_cc o_cc2 pt80 pb80">
-                            ...
-                        </section>
-
-                    </div>
-                </t>
-            </t>
-        </field>
-    </record>
-</odoo>
-```
-
----
-
-### Deploying on Odoo.sh
-
-1. Push to `main` → Odoo.sh triggers a rebuild automatically
-2. If the branch is locked by an AI session → click **Rebuild** in the Odoo.sh dashboard
-3. After rebuild → **Apps → Update Apps List → install or upgrade your theme**
-4. **Rebuild alone does NOT apply XML/template changes** — you must also upgrade the module
-
----
-
-### Common SCSS gotchas
-
-- Do not use `lighten()` / `darken()` — use literal hex values instead (Dart Sass deprecation)
-- Do not use the `$o-colors` map directly — use individual `$o-color-1` … `$o-color-5` variables
-- Never use wildcards in asset paths
-- All rules must be scoped inside `#wrapwrap`
-- `primary_variables.scss` and `bootstrap_overridden.scss` must contain **only variable definitions** — no output CSS
+1. Click **Edit** on the page
+2. Click on a placeholder image block
+3. Upload your photo
+4. Save and publish
 
 ---
 
 ## Files in this repo
 
-| File | Purpose |
-|------|---------|
-| `CLAUDE.md` | Quick rules and gotchas for Claude Code when working on Odoo themes |
-| `ODOO_REFERENCE.md` | Full Odoo 19 website theme API reference |
-| `README.md` | This file — setup and workflow guide |
+| File | What it is |
+|------|-----------|
+| `README.md` | This guide |
+| `CLAUDE.md` | Rules Claude follows when building Odoo themes |
+| `ODOO_REFERENCE.md` | Full Odoo 19 theme API reference (Claude reads this too) |
+
+---
+
+## Quick reference — useful commands
+
+| What you want | Say this to Claude |
+|---------------|--------------------|
+| Create a new theme | "Create a new Odoo theme called X in repo wedoobe/Y" |
+| Fix a visual issue | "The header background is white, it should be black" |
+| Add a new section | "Add a testimonials section below the expertise block" |
+| Sync docs | "Sync CLAUDE.md and ODOO_REFERENCE.md to repo wedoobe/Y" |
+| Check what's in a repo | "List all files in wedoobe/Y" |
