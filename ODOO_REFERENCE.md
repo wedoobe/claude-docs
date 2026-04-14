@@ -2033,3 +2033,22 @@ ZIP size limit: **50MB**.
 - SEO: check page titles, meta descriptions, structured data
 - URL redirects: set up any redirect mappings for old URLs
 - Domain name: configure the domain in Website settings
+
+---
+
+## Theme Development Workflow
+
+**Always follow this process before writing any code:**
+
+1. **Ask for a design** — request a screenshot, mockup, or reference website before starting
+2. **Cut the design into sections** — identify each distinct visual block:
+   - Hero / banner
+   - Card grids
+   - Icon/feature rows
+   - CTA / contact sections
+   - Header & footer
+3. **Map each section to a block** — each block gets its own:
+   - XML template (`data/pages/home.xml` or `views/snippets/s_<name>.xml`)
+   - SCSS file (`static/src/scss/pages/` or `static/src/scss/snippets/`)
+   - JS only if interactive behaviour is needed
+4. **Never start building** until the design is confirmed and all sections are identified
