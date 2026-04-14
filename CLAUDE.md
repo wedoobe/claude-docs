@@ -168,3 +168,12 @@ Always use Odoo's default options first. Enable the default, then extend it. Rec
 **Odoo.sh:** Apps → Update Apps List → install.
 
 Before launch: check SEO, URL redirects, domain name configuration.
+
+## Theme Development Workflow
+
+**Always follow this process before writing any code:**
+
+1. **Ask for a design** — request a screenshot, mockup, or reference website before starting
+2. **Cut the design into sections** — identify each distinct visual block (hero, cards, expertise grid, CTA, footer, etc.)
+3. **Map sections to blocks** — create a separate snippet or page section for each block, with its own XML, SCSS, and (if needed) JS
+4. Never start building until the design is confirmed and sections are agreed upon
